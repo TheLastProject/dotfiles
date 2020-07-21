@@ -1,0 +1,19 @@
+#!/bin/sh
+
+{{ if eq .chezmoi.os "linux" -}}
+sudo dnf install -y zsh fzf tmux
+{{ else if eq .chezmoi.os "darwin" -}}
+if [ ! -f "/usr/local/bin/brew" ]; then
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
+fi
+brew install fzf tmux || true
+yes | $(brew --prefix)/opt/fzf/install || true
+{{ end -}}
+
+if [ "$SHELL" != "$(which zsh)" ]; then
+  chsh -s $(which zsh)
+fi
+
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm || true
+tmux source ~/.tmux.conf
+~/.tmux/plugins/tpm/bin/install_plugins all || true
