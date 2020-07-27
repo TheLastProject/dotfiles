@@ -1,0 +1,76 @@
+# espanso configuration file
+
+# This is the default configuration file, change it as you like it
+# You can refer to the official documentation:
+# https://espanso.org/docs/
+
+# Matches are the substitution rules, when you type the "trigger" string
+# it gets replaced by the "replace" string.
+matches:
+  # Simple text replacement
+  - trigger: ":mvg"
+    replace: "Met vriendelijke groet,\nSylvia van Os"
+
+  - trigger: ":kr"
+    replace: "Kind regards,\nSylvia van Os"
+
+  # Dates
+  - trigger: ":date"
+    replace: "{{mydate}}"
+    vars:
+      - name: mydate
+        type: date
+        params:
+          format: "%m/%d/%Y"
+
+  # Special characters
+  - trigger: ":'a"
+    replace: "á"
+  - trigger: ":'e"
+    replace: "é"
+  - trigger: ":'i"
+    replace: "í"
+  - trigger: ":'o"
+    replace: "ó"
+  - trigger: ":'u"
+    replace: "ú"
+  - trigger: ":`a"
+    replace: "à"
+  - trigger: ":`e"
+    replace: "è"
+  - trigger: ":`i"
+    replace: "ì"
+  - trigger: ":`o"
+    replace: "ò"
+  - trigger: ":`u"
+    replace: "ù"
+  - trigger: ':"a'
+    replace: "ä"
+  - trigger: ':"e'
+    replace: "ë"
+  - trigger: ':"i'
+    replace: "ï"
+  - trigger: ':"o'
+    replace: "ö"
+  - trigger: ':"u'
+    replace: "ü"
+  - trigger: ':"y'
+    replace: "ÿ"
+  - trigger: ":^a"
+    replace: "â"
+  - trigger: ":^e"
+    replace: "ê"
+  - trigger: ":^i"
+    replace: "î"
+  - trigger: ":^o"
+    replace: "ô"
+  - trigger: ":^u"
+    replace: "û"
+  - trigger: ":~a"
+    replace: "ã"
+  - trigger: ":~o"
+    replace: "õ"
+  - trigger: ":~n"
+    replace: "ñ"
+  - trigger: ":,c"
+    replace: "ç"
