@@ -1,12 +1,15 @@
 #!/bin/sh
 
 {{ if eq .chezmoi.os "linux" -}}
-sudo dnf install -y zsh fzf tmux
+sudo dnf install -y fzf snapd tmux zsh 
+sudo ln -s /var/lib/snapd/snap /snap
+sudo snap install espanso --classic
 {{ else if eq .chezmoi.os "darwin" -}}
 if [ ! -f "/usr/local/bin/brew" ]; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 fi
-brew install fzf tmux || true
+brew tap federico-terzi/espanso || true
+brew install espanso fzf tmux || true
 yes | $(brew --prefix)/opt/fzf/install || true
 {{ end -}}
 
