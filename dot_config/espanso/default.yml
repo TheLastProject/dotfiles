@@ -74,3 +74,5 @@ matches:
     replace: "ñ"
   - trigger: ":,c"
     replace: "ç"
+  - trigger: ":ss"
+    replace: "ß"
