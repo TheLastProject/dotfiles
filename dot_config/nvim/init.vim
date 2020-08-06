@@ -1,15 +1,20 @@
-set nocompatible "Needed by Vundle
-filetype off "Needed by Vundle
-set rtp+=~/.vim/bundle/Vundle.vim "Add Vundle to runtime path
+set nocompatible
 
-call vundle#begin()
-    Plugin 'VundleVim/Vundle.vim' "Vundle
-    Plugin 'neomake/neomake' "Neomake
-    Plugin 'majutsushi/tagbar' "Tagbar
-    Plugin 'TheLastProject/vim-betterK.git' "Improve K command
-    Plugin 'junegunn/fzf' "Fuzzy file finder
-    Plugin 'junegunn/fzf.vim' "Fuzzy file finder vim extras
-call vundle#end()
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs
+    \ https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+call plug#begin('~/.vim/plugged')
+    Plug 'editorconfig/editorconfig-vim' "Editorconfig
+    Plug 'neomake/neomake' "Neomake
+    Plug 'majutsushi/tagbar' "Tagbar
+    Plug 'TheLastProject/vim-betterK' "Improve K command
+    Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } "Fuzzy file finder
+    Plug 'junegunn/fzf.vim' "Fuzzy file finder vim extras
+    Plug 'tpope/vim-sleuth' "Indent detection
+call plug#end()
 
 "Automatically check syntax
 autocmd! BufWritePost,BufEnter * Neomake

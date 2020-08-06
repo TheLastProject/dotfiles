@@ -1,2 +1,2 @@
 #!/bin/sh
-nvim +PlugInstall +qall
+nvim +PlugUpdate +qall
