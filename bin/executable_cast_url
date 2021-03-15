@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ -n "${2}" ]; then
+    chromecast_ip="${2}"
+else
+    chromecast_ip="192.168.178.38"
+fi
+
+youtube-dl --get-url --format best "${1}" | cvlc - --sout "#chromecast" --sout-chromecast-ip="${chromecast_ip}" --demux-filter=demux_chromecast
