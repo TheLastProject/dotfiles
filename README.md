@@ -32,7 +32,7 @@ Defaults to the local directory.
 
 Flags:
 ```
--t threshold (set threshold percentage, default 50)
+-t threshold (set threshold percentage, default 10)
 -h (output human readable values, default false)
 -v (output verbose values, default false)
 ```
