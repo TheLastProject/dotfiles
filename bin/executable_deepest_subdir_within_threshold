@@ -1,4 +1,8 @@
 #!/bin/bash
+# Find deepest subdir within threshold
+#
+# Copyright 2020 Sylvia van Os <sylvia@hackerchick.me>
+# License: CC0 1.0
 
 # Find the directories taking the most space recursively
 # Only listing the directories that use threshold% of the disk usage

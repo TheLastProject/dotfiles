@@ -1,0 +1,151 @@
+#!/bin/sh
+# Gredit - Grep & Edit
+#
+# Copyright 2019 Sylvia van Os <sylvia@hackerchick.me>
+# https://github.com/TheLastProject/gredit
+# License: CC0 1.0
+
+# Enable case insensitive matching in grep
+case_insensitive=0
+
+# Do not open editor without user confirmation
+confirm=1
+
+# List of files/directories to exclude
+excludes=""
+
+# List only instead of edit
+list_only=0
+
+# Enable recursive searching in grep
+recursive=0
+
+# Help function
+usage() {
+  printf 'Usage: %s [-ilrqh] [-e exclude] regexp [location]\n' "$(basename "$0")"
+  echo
+  echo "Arguments:"
+  echo "  -e <file/directory> Ignore all matches in file/directory"
+  echo "  -i                  Match case-insensitive"
+  echo "  -l                  List matches instead of editing them"
+  echo "  -r                  Search recursively"
+  echo "  -q                  Quiet (don't ask for confirmation before opening editor)"
+  echo "  -h                  Print this help"
+}
+
+# Parse the options
+while getopts "e:hilrq" opt; do
+  case "$opt" in
+  e)
+    # Ignore all matches in file/directory
+    if [ -z "$excludes" ]; then
+      excludes="$OPTARG"
+    else
+      excludes="$excludes $OPTARG"
+    fi
+    ;;
+  h)
+    # Print this help
+    usage
+    exit 0
+    ;;
+  i)
+    # Match case-insensitive
+    case_insensitive=1
+    ;;
+  l)
+    # Only list matches
+    list_only=1
+    ;;
+  r)
+    # Search recursively
+    recursive=1
+    ;;
+  q)
+    # Quiet (don't ask for confirmation before opening editor)
+    confirm=0
+    ;;
+  *)
+    # Catch-all for help
+    usage
+    exit 1
+  esac
+done
+
+# Remove everything caught by getopts
+shift $((OPTIND-1))
+
+# Parse the arguments from the script
+regexp="$1"
+shift
+location="$*"
+
+# Print help if no search string has been passed
+if [ -z "$regexp" ]; then
+  usage
+  exit 1
+fi
+
+# Search all files in the CWD by default
+if [ -z "$location" ]; then
+  location="*"
+fi
+
+# -a: treat files as ASCII
+# -n: print line numbers
+grep_flags="-an"
+
+# Add -i if user wants case insensitive matching
+if [ "$case_insensitive" -eq 1 ]; then
+  grep_flags="${grep_flags}i"
+fi
+
+# Add -r if user wants recursive searching
+if [ "$recursive" -eq 1 ]; then
+  grep_flags="${grep_flags}r"
+fi
+
+# Add each exclude as both file and dir
+for exclude in $excludes; do
+  grep_flags="--exclude=$exclude --exclude-dir=$exclude $grep_flags"
+done
+
+# Open each result in EDITOR (fall back to vi)
+# shellcheck disable=SC2086
+grep $grep_flags "$regexp" $location | while IFS= read -r line
+do
+  filename="$(echo "$line" | cut -d':' -f1)"
+  line_number="$(echo "$line" | cut -d':' -f2)"
+
+  # Only print list if -l is given
+  if [ "$list_only" -eq 1 ]; then
+    echo "$filename:$line_number"
+    continue
+  fi
+
+  # Ask for confirmation
+  if [ "$confirm" -eq 1 ]; then
+    printf %s "Edit $filename:$line_number? [Ynaq] "
+    read -r confirmation < /dev/tty
+    case "$confirmation" in
+      N|n)
+        # Don't edit file
+        continue
+        ;;
+      A|a)
+        # Edit all (disable confirmations)
+        confirm=0
+        ;;
+      Q|q)
+        # Quit
+        exit 0
+        ;;
+      *)
+        # Edit file (default)
+        ;;
+    esac
+  fi
+
+  # Actually open editor
+  ${EDITOR:-vi} "+$line_number" "$filename" < /dev/tty
+done

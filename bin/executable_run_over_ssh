@@ -1,5 +1,10 @@
 #!/bin/sh
+# Run a local shell script on a remote machine over SSH
+#
+# Copyright 2020 Sylvia van Os <sylvia@hackerchick.me>
+# License: Unlicense
 
+# Check based on https://stackoverflow.com/a/46464187
 if echo | base64 -w0 > /dev/null 2>&1; then
   # GNU coreutils base64, '-w' supported
   base64_cmd="base64 -w0"

@@ -1,4 +1,8 @@
 #!/bin/bash
+# Cast a youtube-dl compatible URL to Chromecast
+#
+# Copyright 2020 Sylvia van Os <sylvia@hackerchick.me>
+# License: CC0 1.0
 
 if [ -n "${2}" ]; then
     chromecast_ip="${2}"

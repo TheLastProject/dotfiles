@@ -42,6 +42,25 @@ Example:
 deepest_subdir_within_threshold -t 10 -hv /some_dir
 ```
 
+# gredit
+Grep & Edit
+
+Grep and open each match in `$EDITOR`.
+
+Known working editors are vi and nano.
+
+```
+Usage: gredit [-ilrqh] [-e exclude] regexp [location]
+
+Arguments:
+  -e <file/directory> Ignore all matches in file/directory
+  -i                  Match case-insensitive
+  -l                  List matches instead of editing them
+  -r                  Search recursively
+  -q                  Quiet (don't ask for confirmation before opening editor)
+  -h                  Print this help
+```
+
 # run_over_ssh
 Runs a local shellscript on a machine you SSH to, including flags you may want to use.
 
