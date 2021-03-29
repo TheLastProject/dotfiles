@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# Find the directories taking the most space recursively
+# Only listing the directories that use threshold% of the disk usage
+
+# Converts bytes value to human-readable string [$1: bytes value]
+# From https://unix.stackexchange.com/a/259254
+bytesToHumanReadable() {
+    local i=${1:-0} d="" s=0 S=("Bytes" "KiB" "MiB" "GiB" "TiB" "PiB" "EiB" "YiB" "ZiB")
+    while ((i > 1024 && s < ${#S[@]}-1)); do
+        printf -v d ".%02d" $((i % 1024 * 100 / 1024))
+        i=$((i / 1024))
+        s=$((s + 1))
+    done
+    echo "$i$d ${S[$s]}"
+}
+
+kbToHumanReadable() {
+  bytesToHumanReadable $((${1} * 1024))
+}
+
+# Default values
+path="."
+threshold=50
+human_readable=0
+verbose=0
+
+while getopts "p:t:hv" optchar; do
+  case "${optchar}" in
+    t) threshold="${OPTARG}" ;;
+    h) human_readable=1 ;;
+    v) verbose=1 ;;
+    *) echo "Unknown flag ${optchar}, ignoring..." ;;
+  esac
+done
+
+shift $((OPTIND-1))
+if [ -n "$1" ]; then
+  path="${1}"
+fi
+
+parent_size="$(du -s "${path}" | awk '{ print $1 }')"
+
+if [ "${verbose}" -eq 1 ]; then
+  if [ "${human_readable}" -eq 1 ]; then
+    echo "Calculated parent size: $(kbToHumanReadable "${parent_size}")"
+  else
+    echo "Calculated parent size: ${parent_size}"
+  fi
+fi
+
+threshold_size="$(echo "${parent_size}/100*${threshold}" | bc)"
+
+if [ "${verbose}" -eq 1 ]; then
+  if [ "${human_readable}" -eq 1 ]; then
+    echo "Calculated threshold size from percentage ${threshold}%: $(kbToHumanReadable "${threshold_size}")"
+  else
+    echo "Calculated threshold size from percentage ${threshold}%: ${threshold_size}"
+  fi
+fi
+
+
+print_last_within_size () {
+  # $1 = start_dir
+  # $2 = min_size
+  #
+  # return values:
+  # 1 = dir is smaller than threshold size
+  # 2 = all children are smaller than threshold size and dir name was printed
+  dir_size="$(du -s "${1}" | awk '{ print $1 }')"
+
+  if [ "${dir_size}" -lt "${2}" ]; then
+    return 1
+  fi
+
+  all_smaller=1
+  current_dir_size="${dir_size}" # all shell variables are global, don't have it overwritten by the next loop in case we may have to print it
+  while IFS= read -r -d $'\0' subdir
+  do
+    print_last_within_size "${subdir}" "${2}"
+    if [ "${?}" -ne 1 ]; then
+      all_smaller=0
+    fi
+  done < <(find "${1}" -type d -mindepth 1 -maxdepth 1 -print0)
+
+  if [ "${all_smaller}" -eq 1 ]; then
+    if [ "${human_readable}" -eq 1 ]; then
+      echo "$(kbToHumanReadable "${current_dir_size}") ${1}"
+    else
+      echo "${current_dir_size} ${1}"
+    fi
+    return 2
+  fi
+}
+
+while IFS= read -r -d $'\0' subdir
+do
+  print_last_within_size "${subdir}" "${threshold_size}"
+done < <(find "${path}" -type d -mindepth 1 -maxdepth 1 -print0)

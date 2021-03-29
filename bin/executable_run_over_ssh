@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if echo | base64 -w0 > /dev/null 2>&1; then
+  # GNU coreutils base64, '-w' supported
+  base64_cmd="base64 -w0"
+else
+  # Openssl base64, no wrapping by default
+  base64_cmd="base64"
+fi
+
+ssh_command="${1}"
+shift
+local_script="${1}"
+shift
+
+ssh "${ssh_command}" "echo $($base64_cmd "${local_script}") | base64 -d | bash -s -- "${@}""
