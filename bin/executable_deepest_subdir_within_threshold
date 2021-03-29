@@ -81,7 +81,7 @@ print_last_within_size () {
     if [ "${?}" -ne 1 ]; then
       all_smaller=0
     fi
-  done < <(find "${1}" -type d -mindepth 1 -maxdepth 1 -print0)
+  done < <(find "${1}" -mindepth 1 -maxdepth 1 -type d -print0)
 
   if [ "${all_smaller}" -eq 1 ]; then
     if [ "${human_readable}" -eq 1 ]; then
@@ -96,4 +96,4 @@ print_last_within_size () {
 while IFS= read -r -d $'\0' subdir
 do
   print_last_within_size "${subdir}" "${threshold_size}"
-done < <(find "${path}" -type d -mindepth 1 -maxdepth 1 -print0)
+done < <(find "${path}" -mindepth 1 -maxdepth 1 -type d -print0)
