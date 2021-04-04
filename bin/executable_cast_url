@@ -24,50 +24,56 @@ start_vlc() {
 url="${1}"
 
 if [ -n "${2}" ]; then
-    chromecast_ip="${2}"
+    is_managed="${2}"
+else
+    is_managed=0
+fi
+
+if [ -n "${3}" ]; then
+    chromecast_ip="${3}"
 else
     chromecast_ip="192.168.178.38"
 fi
 
 http_password="$(pwgen -s 100 | head -n 1)"
 
-# So... VLC does not recover well from network issues
-# So we do the following:
-# 1. Start VLC with the HTTP API running
-# 3. Check if the VLC process exists (if not, restart it)
-# 4. Check if the length is 600 seconds (I guess that's the buffer length at streams)
-# 5. Check if we're at 0 seconds, that's what seems to happen if the buffer dies (if we are, restart it)
-start_vlc
+if [ "${is_managed}" -ne 0 ]; then
+    # So... VLC does not recover well from network issues
+    # So we do the following:
+    # 1. Start VLC with the HTTP API running
+    # 3. Check if the VLC process exists (if not, restart it)
+    # 4. Check if the length is 600 seconds (I guess that's the buffer length at streams)
+    # 5. Check if we're at 0 seconds, that's what seems to happen if the buffer dies (if we are, restart it)
+    start_vlc
 
-while true; do
-    sleep 1
+    while true; do
+        sleep 1
 
-    if kill -0 "$vlc_pid"; then
-        length="$(curl -u ":$http_password" "http://127.0.0.1:${vlc_port}/requests/status.json" | jq -r .length)"
+        if kill -0 "$vlc_pid"; then
+            length="$(curl -u ":$http_password" "http://127.0.0.1:${vlc_port}/requests/status.json" | jq -r .length)"
 
-        if [ "${waiting_to_start}" -gt 0 ]; then
-          waiting_to_start="$((${waiting_to_start}-1))"
-          sleep 1
-        fi
-
-        if [ "${length}" = -1 ]; then
-            # We're still loading, just wait
-            waiting_to_start=5
-            sleep 1
-        elif [ "${length}" = 600 ]; then
-            # This is a stream
-            playlist_position="$(curl -u ":$http_password" "http://127.0.0.1:${vlc_port}/requests/status.json" | jq -r .position)"
-  
-            if [ "$playlist_position" = 0 ]; then
-                # Stream probably broke
-                kill "$vlc_pid"
-                start_vlc
+            if [ "${waiting_to_start}" -gt 0 ]; then
+              waiting_to_start="$((${waiting_to_start}-1))"
+              sleep 1
             fi
-        elif [ "${waiting_to_start}" -eq 0 ]; then
-            # Not a stream, doesn't need watching
-            exit 0
+
+            if [ "${length}" = -1 ]; then
+                # We're still loading, just wait
+                waiting_to_start=5
+                sleep 1
+            else
+                playlist_position="$(curl -u ":$http_password" "http://127.0.0.1:${vlc_port}/requests/status.json" | jq -r .position)"
+
+                if [ "$playlist_position" = 0 ]; then
+                    # Stream probably broke
+                    kill "${vlc_pid}"
+                    start_vlc
+                fi
+            fi
+        else
+          start_vlc
         fi
-    else
-      start_vlc
-    fi
-done
+    done
+else
+    youtube-dl --get-url --format best "${url}" | cvlc - --sout "#chromecast" --sout-chromecast-ip="${chromecast_ip}" --demux-filter=demux_chromecast vlc://quit
+fi
