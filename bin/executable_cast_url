@@ -4,10 +4,70 @@
 # Copyright 2020 Sylvia van Os <sylvia@hackerchick.me>
 # License: CC0 1.0
 
+choose_random_free_port() {
+  # From https://unix.stackexchange.com/a/248319
+    read LOWERPORT UPPERPORT < /proc/sys/net/ipv4/ip_local_port_range
+    while true; do
+        PORT="`shuf -i ${LOWERPORT}-${UPPERPORT} -n 1`"
+        ss -lpn | grep -q ":${PORT} " || break
+    done
+    vlc_port="${PORT}"
+}
+
+start_vlc() {
+  choose_random_free_port
+  youtube-dl --get-url --format best "${url}" | cvlc - -I http --http-port "${vlc_port}" --http-password "${http_password}" --sout "#chromecast" --sout-chromecast-ip="${chromecast_ip}" --demux-filter=demux_chromecast vlc://quit &
+  vlc_pid="$(echo $!)"
+}
+
+url="${1}"
+
 if [ -n "${2}" ]; then
     chromecast_ip="${2}"
 else
     chromecast_ip="192.168.178.38"
 fi
 
-youtube-dl --get-url --format best "${1}" | cvlc - --sout "#chromecast" --sout-chromecast-ip="${chromecast_ip}" --demux-filter=demux_chromecast
+http_password="$(pwgen -s 100 | head -n 1)"
+
+# So... VLC does not recover well from network issues
+# So we do the following:
+# 1. Start VLC with the HTTP API running
+# 3. Check if the VLC process exists (if not, restart it)
+# 4. Check if the length is 600 seconds (I guess that's the buffer length at streams)
+# 5. Check if we're at 0 seconds, that's what seems to happen if the buffer dies (if we are, restart it)
+start_vlc
+
+waiting_to_start=1
+while true; do
+    sleep 1
+
+    if kill -0 "$vlc_pid"; then
+        length="$(curl -u ":$http_password" "http://127.0.0.1:${vlc_port}/requests/status.json" | jq -r .length)"
+
+        if [ "${waiting_to_start}" -gt 0 ]; then
+          waiting_to_start="$((${waiting_to_start}-1))"
+          sleep 1
+        fi
+
+        if [ "${length}" = -1 ]; then
+            # We're still loading, just wait
+            waiting_to_start=5
+            sleep 1
+        elif [ "${length}" = 600 ]; then
+            # This is a stream
+            playlist_position="$(curl -u ":$http_password" "http://127.0.0.1:${vlc_port}/requests/status.json" | jq -r .position)"
+  
+            if [ "$playlist_position" = 0 ]; then
+                # Stream probably broke
+                kill "$vlc_pid"
+                start_vlc
+            fi
+        elif [ "${waiting_to_start}" -eq 0 ]; then
+            # Not a stream, doesn't need watching
+            exit 0
+        fi
+    else
+      start_vlc
+    fi
+done
