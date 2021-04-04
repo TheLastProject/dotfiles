@@ -15,9 +15,10 @@ choose_random_free_port() {
 }
 
 start_vlc() {
-  choose_random_free_port
-  youtube-dl --get-url --format best "${url}" | cvlc - -I http --http-port "${vlc_port}" --http-password "${http_password}" --sout "#chromecast" --sout-chromecast-ip="${chromecast_ip}" --demux-filter=demux_chromecast vlc://quit &
-  vlc_pid="$(echo $!)"
+    choose_random_free_port
+    youtube-dl --get-url --format best "${url}" | cvlc - -I http --http-port "${vlc_port}" --http-password "${http_password}" --sout "#chromecast" --sout-chromecast-ip="${chromecast_ip}" --demux-filter=demux_chromecast vlc://quit &
+    vlc_pid="$(echo $!)"
+    waiting_to_start=5
 }
 
 url="${1}"
@@ -38,7 +39,6 @@ http_password="$(pwgen -s 100 | head -n 1)"
 # 5. Check if we're at 0 seconds, that's what seems to happen if the buffer dies (if we are, restart it)
 start_vlc
 
-waiting_to_start=1
 while true; do
     sleep 1
 
