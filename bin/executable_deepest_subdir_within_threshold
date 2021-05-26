@@ -23,17 +23,23 @@ kbToHumanReadable() {
   bytesToHumanReadable $((${1} * 1024))
 }
 
+getPartitionId() {
+  stat --format %d "${1}"
+}
+
 # Default values
 path="."
 threshold=10
 human_readable=0
 verbose=0
+cross_partitions=0
 
-while getopts "p:t:hv" optchar; do
+while getopts "p:t:hvx" optchar; do
   case "${optchar}" in
     t) threshold="${OPTARG}" ;;
     h) human_readable=1 ;;
     v) verbose=1 ;;
+    x) cross_partitions=1 ;;
     *) echo "Unknown flag ${optchar}, ignoring..." ;;
   esac
 done
@@ -63,14 +69,25 @@ if [ "${verbose}" -eq 1 ]; then
   fi
 fi
 
+path_partition="$(getPartitionId "${path}")"
 
 print_last_within_size () {
   # $1 = start_dir
   # $2 = min_size
   #
   # return values:
-  # 1 = dir is smaller than threshold size
+  # 1 = dir is smaller than threshold size or on another partition and no cross_partition enablede
   # 2 = all children are smaller than threshold size and dir name was printed
+  if [ "${cross_partitions}" -eq 0 ]; then
+    subdir_partition="$(getPartitionId "${1}")"
+    if [ "${path_partition}" -ne "${subdir_partition}" ]; then
+      if [ "${verbose}" -eq 1 ]; then
+        echo "Skipping ${1}, is on another partition"
+      fi
+      return 1
+    fi
+  fi
+
   dir_size="$(du -s "${1}" | awk '{ print $1 }')"
 
   if [ "${dir_size}" -lt "${2}" ]; then
