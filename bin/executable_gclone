@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+# Clone a git repo to a path based on its full URL
+#
+# Copyright 2021 Sylvia van Os <sylvia@hackerchick.me>
+# Based on an idea from Rob Nieuwenhuizen (https://github.com/prutseltje)
+# License: CC0 1.0
+
+import os
+import subprocess
+import sys
+
+from urllib.parse import urlsplit
+
+full_url = sys.argv[1]
+url = urlsplit(full_url)
+
+if not url.scheme:
+    path = url.path.split(":", 1)[1]
+else:
+    path = url.path
+
+if path.startswith("/"):
+    path = path[1:]
+
+if path.endswith(".git"):
+    path = path[:-4]
+
+os.makedirs(path)
+subprocess.run(["git", "clone", full_url, path])
