@@ -1,20 +1,22 @@
 #!/bin/sh
 
 {{ if eq .chezmoi.os "linux" -}}
-sudo dnf install -y fzf snapd tmux zsh progress
+sudo dnf install -y direnv fzf snapd tmux progress starship
 sudo ln -s /var/lib/snapd/snap /snap
 sudo snap install espanso --classic
+sudo snap install codium
 {{ else if eq .chezmoi.os "darwin" -}}
 if [ ! -f "/usr/local/bin/brew" ]; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 fi
 brew tap federico-terzi/espanso || true
-brew install espanso fzf tmux progress || true
+brew install bash direnv espanso fzf starship tmux progress || true
 yes | $(brew --prefix)/opt/fzf/install || true
+brew install --cask vscodium
 {{ end -}}
 
-if [ "$SHELL" != "$(which zsh)" ]; then
-  chsh -s $(which zsh)
+if [ "$SHELL" != "$(which bash)" ]; then
+  chsh -s $(which bash)
 fi
 
 git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm || true
