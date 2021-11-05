@@ -42,6 +42,16 @@ Example:
 deepest_subdir_within_threshold -t 10 -hv /some_dir
 ```
 
+# gclone
+Git clone into an appropriately named subdirectory.
+
+Example:
+```
+gclone https://github.com/TheLastProject/Catima
+```
+
+Will create TheLastProject/Catima and put the git repo there.
+
 # gredit
 Grep & Edit
 
