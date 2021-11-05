@@ -4,7 +4,7 @@
 sudo dnf install -y direnv fzf snapd tmux progress starship
 sudo ln -s /var/lib/snapd/snap /snap
 sudo snap install espanso --classic
-sudo snap install codium
+sudo snap install codium --classic
 {{ else if eq .chezmoi.os "darwin" -}}
 if [ ! -f "/usr/local/bin/brew" ]; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
