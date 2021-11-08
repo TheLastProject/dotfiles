@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cat "{{ .chezmoi.homeDir }}/.config/crontab" | crontab -

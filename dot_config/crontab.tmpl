@@ -1,0 +1,4 @@
+36 * * * * cd {{ .chezmoi.homeDir }}/.password-store && git pull && git push"
+{{ if eq .chezmoi.os "darwin" -}}
+58 * * * * brew update; brew outdated | wc -l | tr -d ' ' > /tmp/brew_outdated_count"
+{{- end }}
