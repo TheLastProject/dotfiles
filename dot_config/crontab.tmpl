@@ -1,4 +1,5 @@
 36 * * * * cd {{ .chezmoi.homeDir }}/.password-store && git pull && git push
 {{ if eq .chezmoi.os "darwin" -}}
 58 * * * * /usr/local/bin/brew update; /usr/local/bin/brew outdated | wc -l | tr -d ' ' > /tmp/brew_outdated_count
+22 * * * * RESTIC_PROGRESS_FPS=0.016666 RESTIC_PASSWORD_COMMAND="pass Backup" restic -r sftp:restic-backup-host:home/backups/macbook backup --quiet ~/ --exclude ~/'.*' > /tmp/restic_progress
 {{- end }}

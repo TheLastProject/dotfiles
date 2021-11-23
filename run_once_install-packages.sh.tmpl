@@ -10,7 +10,7 @@ if [ ! -f "/usr/local/bin/brew" ]; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 fi
 brew tap federico-terzi/espanso || true
-brew install bash direnv espanso fzf starship tmux progress || true
+brew install bash direnv espanso fzf restic starship tmux progress xbar || true
 yes | $(brew --prefix)/opt/fzf/install || true
 brew install --cask vscodium
 {{ end -}}

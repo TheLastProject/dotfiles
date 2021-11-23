@@ -17,7 +17,7 @@ if [ -z "${TMUX}" ]; then
   tmux -2
 fi
 
-export PATH="$PATH:$HOME/.local/bin"
+export PATH="$HOME/bin:$HOME/.local/bin:/usr/local/sbin:$PATH"
 
 eval "$(starship init bash)"
 
