@@ -1,7 +1,7 @@
 #!/bin/sh
 
 {{ if eq .chezmoi.os "linux" -}}
-sudo dnf install -y direnv fzf progress restic snapd starship tmux
+sudo dnf install -y direnv flock fzf progress restic snapd starship tmux
 sudo ln -s /var/lib/snapd/snap /snap
 sudo snap install espanso --classic
 sudo snap install codium --classic
@@ -10,7 +10,8 @@ if [ ! -f "/usr/local/bin/brew" ]; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 fi
 brew tap federico-terzi/espanso || true
-brew install bash direnv espanso fzf progress restic starship tmux xbar || true
+brew tap discoteq/discoteq || true
+brew install bash direnv espanso flock fzf progress restic starship tmux xbar || true
 yes | $(brew --prefix)/opt/fzf/install || true
 brew install --cask vscodium
 {{ end -}}
