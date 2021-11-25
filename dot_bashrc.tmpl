@@ -10,8 +10,10 @@ fi
 
 # User specific aliases and functions
 
-EDITOR="nvim"
-VISUAL=$EDITOR
+export EDITOR="nvim"
+export VISUAL=$EDITOR
+export {{ template "env_restic_password_command" . }}
+export {{ template "env_restic_repository" . }}
 
 if [ -z "${TMUX}" ]; then
   tmux -2

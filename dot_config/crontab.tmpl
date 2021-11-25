@@ -1,5 +1,5 @@
 36 * * * * cd {{ .chezmoi.homeDir }}/.password-store && git pull && git push
-22 * * * * PATH="/usr/local/bin:$PATH" RESTIC_PROGRESS_FPS=0.016666 RESTIC_PASSWORD_COMMAND="pass Backup" flock --nonblock --conflict-exit-code 0 /tmp/restic-$UID.lock restic -r sftp:restic-backup-host:home/backups/{{ if eq .chezmoi.os "darwin" }}macbook{{ else }}laptop{{ end }} backup --quiet ~/ --exclude ~/'.*' > /tmp/restic_progress
+22 * * * * PATH="/usr/local/bin:$PATH" RESTIC_PROGRESS_FPS=0.016666 {{ template "env_restic_password_command" . }} {{ template "env_restic_repository" . }} flock --nonblock --conflict-exit-code 0 /tmp/restic-$UID.lock restic backup --quiet ~/ --exclude ~/'.*' > /tmp/restic_progress
 {{ if eq .chezmoi.os "darwin" -}}
 58 * * * * /usr/local/bin/brew update; /usr/local/bin/brew outdated | wc -l | tr -d ' ' > /tmp/brew_outdated_count
 {{- end }}

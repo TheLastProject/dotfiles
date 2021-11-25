@@ -1,0 +1,1 @@
+RESTIC_REPOSITORY="sftp:restic-backup-host:home/backups/{{ if eq .chezmoi.os "darwin" }}macbook{{ else }}laptop{{ end }}"
