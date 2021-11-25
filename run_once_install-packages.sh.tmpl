@@ -5,13 +5,32 @@ sudo dnf install -y direnv fzf progress restic snapd starship tmux util-linux-co
 sudo ln -s /var/lib/snapd/snap /snap
 sudo snap install espanso --classic
 sudo snap install codium --classic
+
+# BrowserPass
+curl https://maximbaz.com/pgp_keys.asc | gpg --import
+browserpass_temp="$(mktemp -d)"
+for url in $(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/browserpass/browserpass-native/releases/latest | jq -r '.assets[] | select(.name | test("^browserpass-linux64-[0-9.]*.tar.gz(|.asc)$")).browser_download_url'); do
+  curl -L "$url" -O --output-dir "$browserpass_temp"
+done
+gpg --verify $browserpass_temp/*.asc || exit 1
+mkdir -p "$browserpass_temp/browserpass"
+tar -xf $browserpass_temp/*.tar.gz -C "$browserpass_temp/browserpass" --strip-components=1
+pushd "$browserpass_temp/browserpass"
+PREFIX="$HOME/.browserpass/" make BIN=browserpass-linux64 configure
+PREFIX="$HOME/.browserpass/" make BIN=browserpass-linux64 install
+PREFIX="$HOME/.browserpass/" make hosts-firefox-user
+popd
+rm -rf "$browserpass_temp"
+
 {{ else if eq .chezmoi.os "darwin" -}}
 if [ ! -f "/usr/local/bin/brew" ]; then
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
 fi
 brew tap federico-terzi/espanso || true
 brew tap discoteq/discoteq || true
-brew install bash direnv espanso flock fzf progress restic starship tmux xbar || true
+brew tap amar1729/formula || true
+brew install bash browserpass direnv espanso flock fzf progress restic starship tmux xbar || true
+PREFIX='/usr/local/opt/browserpass' make hosts-firefox-user -f '/usr/local/opt/browserpass/lib/browserpass/Makefile'
 yes | $(brew --prefix)/opt/fzf/install || true
 brew install --cask vscodium
 {{ end -}}
