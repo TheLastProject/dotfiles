@@ -29,7 +29,7 @@ fi
 brew tap federico-terzi/espanso || true
 brew tap discoteq/discoteq || true
 brew tap amar1729/formula || true
-brew install bash browserpass direnv espanso flock fzf progress restic starship tmux xbar || true
+brew install bash bash-completion browserpass direnv espanso flock fzf progress restic starship tmux xbar || true
 PREFIX='/usr/local/opt/browserpass' make hosts-firefox-user -f '/usr/local/opt/browserpass/lib/browserpass/Makefile'
 yes | $(brew --prefix)/opt/fzf/install || true
 brew install --cask vscodium

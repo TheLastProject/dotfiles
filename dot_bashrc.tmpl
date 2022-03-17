@@ -30,3 +30,15 @@ eval "$(direnv hook bash)"
 function brew {
   rm -f /tmp/brew_outdated_count; command brew "$@"
 }
+
+{{ if eq .chezmoi.os "darwin" }}
+# Fix Ansible crash on macOS
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+{{ end }}
+
+source ~/.bash_aliases
+
+{{ if eq .chezmoi.os "darwin" }}
+# Ensure we have all tab completion configured on macOS
+[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
+{{ end }}
