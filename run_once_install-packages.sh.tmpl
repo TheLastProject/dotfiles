@@ -1,7 +1,7 @@
 #!/bin/sh
 
 {{ if eq .chezmoi.os "linux" -}}
-sudo dnf install -y direnv fzf progress restic snapd starship tmux util-linux-core
+sudo dnf install -y direnv fzf git neovim progress restic snapd starship tmux util-linux-core
 sudo ln -s /var/lib/snapd/snap /snap
 sudo snap install espanso --classic
 sudo snap install codium --classic
