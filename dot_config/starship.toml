@@ -4,11 +4,3 @@ add_newline = false
 truncation_length = 8
 truncation_symbol = ".../"
 truncate_to_repo = false
-
-[custom.brew_updates]
-command = "cat /tmp/brew_outdated_count"
-when = """ [ $(cat /tmp/brew_outdated_count) -gt 0 ] """
-format = "with [$symbol( $output )]($style)"
-style = "bold red"
-symbol = "brew outdated"
-os = "macos"

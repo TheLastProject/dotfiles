@@ -14,6 +14,7 @@ call plug#begin('~/.vim/plugged')
     Plug 'junegunn/fzf', { 'do': { -> fzf#install() } } "Fuzzy file finder
     Plug 'junegunn/fzf.vim' "Fuzzy file finder vim extras
     Plug 'tpope/vim-sleuth' "Indent detection
+    Plug 'hashivim/vim-terraform' "Terraform syntax highlighting
 call plug#end()
 
 "Automatically check syntax
