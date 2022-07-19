@@ -1,17 +1,28 @@
-#!/bin/sh
+#!/bin/bash
 
 {{ if eq .chezmoi.os "linux" -}}
-sudo dnf install -y direnv fzf git neovim pass progress restic snapd starship tmux util-linux-core
+{{ if eq .chezmoi.osRelease.id "ubuntu" -}}
+sudo apt update
+sudo apt install -y direnv fzf git jq make neovim pass pass-extension-otp progress restic snapd tmux
+sudo snap install starship
+curl https://getcroc.schollz.com | bash
+{{ end }}
+{{ if eq .chezmoi.osRelease.id "fedora" -}}
+sudo dnf install -y croc direnv fzf git jq neovim pass pass-otp progress restic snapd starship tmux util-linux-core
 sudo ln -s /var/lib/snapd/snap /snap
-sudo snap install espanso --classic
+{{ end }}
 sudo snap install codium --classic
+sudo snap install espanso --classic
+sudo snap install ferdi
 
 # BrowserPass
 curl https://maximbaz.com/pgp_keys.asc | gpg --import
 browserpass_temp="$(mktemp -d)"
+pushd "$browserpass_temp"
 for url in $(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/browserpass/browserpass-native/releases/latest | jq -r '.assets[] | select(.name | test("^browserpass-linux64-[0-9.]*.tar.gz(|.asc)$")).browser_download_url'); do
-  curl -L "$url" -O --output-dir "$browserpass_temp"
+  curl -L "$url" -O
 done
+popd
 gpg --verify $browserpass_temp/*.asc || exit 1
 mkdir -p "$browserpass_temp/browserpass"
 tar -xf $browserpass_temp/*.tar.gz -C "$browserpass_temp/browserpass" --strip-components=1
